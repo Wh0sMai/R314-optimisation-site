@@ -166,37 +166,37 @@
     }
   }
 
-  /* Aligne la hauteur des cartes et anime leur arrivée dans le viewport. */
+  /* Aligne la hauteur des cartes et anime leur arrivée dans le viewport.
+     Toutes les lectures de géométrie d'abord, toutes les écritures ensuite :
+     le navigateur ne recalcule la mise en page qu'une fois par passage. */
   function revealCards() {
     var cards = qsa('.card');
+    var jours = qsa('.cal-day');
+    var hauteur = window.innerHeight;
 
+    // Hauteur de la plus grande carte, pour garder une grille régulière.
+    var tallest = 0;
+    var tops = [];
     for (var i = 0; i < cards.length; i++) {
-      var rect = cards[i].getBoundingClientRect();
+      if (cards[i].offsetHeight > tallest) tallest = cards[i].offsetHeight;
+      tops.push(cards[i].getBoundingClientRect().top);
+    }
+    var jourTops = jours.map(function (j) { return j.getBoundingClientRect().top; });
 
-      // Hauteur de la plus grande carte, pour garder une grille régulière.
-      var tallest = 0;
-      var all = qsa('.card');
-      for (var j = 0; j < all.length; j++) {
-        if (all[j].offsetHeight > tallest) {
-          tallest = all[j].offsetHeight;
-        }
-      }
-      cards[i].style.minHeight = tallest + 'px';
-
-      if (rect.top < window.innerHeight - 40) {
-        cls(cards[i], 'visible', true);
-        cards[i].style.transform = 'translateY(0px)';
+    for (var a = 0; a < cards.length; a++) {
+      cards[a].style.minHeight = tallest + 'px';
+      if (tops[a] < hauteur - 40) {
+        cls(cards[a], 'visible', true);
+        cards[a].style.transform = 'translateY(0px)';
       } else {
-        cards[i].style.transform = 'translateY(24px)';
+        cards[a].style.transform = 'translateY(24px)';
       }
     }
 
     // Les cases du calendrier apparaissent progressivement à l'approche.
-    var jours = qsa('.cal-day');
     for (var k = 0; k < jours.length; k++) {
-      var box = jours[k].getBoundingClientRect();
-      var d = Math.abs(box.top - window.innerHeight / 2);
-      jours[k].style.opacity = Math.max(0.15, 1 - d / window.innerHeight);
+      var d = Math.abs(jourTops[k] - hauteur / 2);
+      jours[k].style.opacity = Math.max(0.15, 1 - d / hauteur);
     }
   }
 
@@ -222,7 +222,17 @@
     if (champ) champ.addEventListener('input', filterGallery);
   });
 
-  window.addEventListener('scroll', revealCards);
-  window.addEventListener('resize', revealCards);
+  // Un seul recalcul par image, quel que soit le nombre d'événements de scroll.
+  var enAttente = false;
+  function planifierReveal() {
+    if (enAttente) return;
+    enAttente = true;
+    requestAnimationFrame(function () {
+      enAttente = false;
+      revealCards();
+    });
+  }
+  window.addEventListener('scroll', planifierReveal, { passive: true });
+  window.addEventListener('resize', planifierReveal);
   window.addEventListener('load', revealCards);
 })();
