@@ -1,7 +1,5 @@
 /* theme-legacy.css — reliquats de l'ancienne charte graphique.
    Conservé pour compatibilité avec les pages qui n'ont pas été reprises. */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
-
 /* Texture d'arrière-plan du bandeau principal. */
 .hero{position:relative;overflow:hidden}
 .hero::before{
@@ -13,11 +11,6 @@
   pointer-events:none;
 }
 .hero-inner{position:relative;z-index:1}
-
-/* Anciennes variantes de titres (thème 2023). */
-.legacy-title{font-family:'Playfair Display',Georgia,serif;font-weight:600}
-.legacy-title--alt{font-family:'Playfair Display',Georgia,serif;font-weight:700;letter-spacing:.4px}
-.legacy-quote{font-family:'Playfair Display',Georgia,serif;font-style:italic}
 
 /* Anciennes cartes, remplacées par .card. */
 .tile{background:#15193A;border-radius:10px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
